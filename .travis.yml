@@ -1,0 +1,24 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t weisurya95/react-test -f ./client/Dockerfile.dev ./client
+  
+script:
+  - docker run -e CI=true weisurya95/react-test npm test
+
+after_success:
+  - docker build -t weisurya95/fibonacci-client ./client
+  - docker build -t weisurya95/fibonacci-nginx ./nginx
+  - docker build -t weisurya95/fibonacci-server ./server
+  - docker build -t weisurya95/fibonacci-worker ./worker
+  
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  - docker push weisurya95/fibonacci-client
+  - docker push weisurya95/fibonacci-nginx
+  - docker push weisurya95/fibonacci-server
+  - docker push weisurya95/fibonacci-worker
+
